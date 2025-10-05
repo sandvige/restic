@@ -108,6 +108,7 @@ jobs:
         cp pkg/cresticlib/build/${{ matrix.output }} release-artifacts/
         cp pkg/cresticlib/resticlib.h release-artifacts/
         cp pkg/cresticlib/ResticLib.hpp release-artifacts/
+        cp pkg/cresticlib/examples/* release-artifacts/ 2>/dev/null || true
         
         # Create README for this platform
         cat > release-artifacts/README-${{ matrix.goos }}-${{ matrix.goarch }}.md << 'EOF'
