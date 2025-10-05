@@ -139,5 +139,5 @@ func (r *repositoryImpl) Backup(ctx context.Context, opts BackupOptions) (Snapsh
 			summary.ProcessedBytes)
 	}
 
-	return SnapshotID(snapshotID.Str()), nil
+	return SnapshotID(snapshotID.String()), nil
 }

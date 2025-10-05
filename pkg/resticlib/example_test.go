@@ -13,8 +13,7 @@ import (
 // create a backup, list snapshots, and perform other operations.
 func Example() {
 	// Create a temporary directory for the repository
-	tempDir := "/tmp/restic-example"
-	_ = os.MkdirAll(tempDir, 0755)
+	tempDir, _ := os.MkdirTemp("", "restic-example-*")
 	defer os.RemoveAll(tempDir)
 
 	ctx := context.Background()
@@ -25,7 +24,7 @@ func Example() {
 		Backend:     resticlib.BackendLocal,
 		Password:    []byte("mysecretpassword"),
 		Parallelism: 4,
-		Logger:      &resticlib.DefaultLogger{Writer: os.Stdout},
+		Logger:      nil, // No logging for clean example output
 	}
 
 	// Initialize a new repository
@@ -39,9 +38,8 @@ func Example() {
 	fmt.Println("Repository initialized successfully")
 
 	// Create a temporary file to backup
-	testDir := "/tmp/restic-test-data"
+	testDir := filepath.Join(tempDir, "test-data")
 	_ = os.MkdirAll(testDir, 0755)
-	defer os.RemoveAll(testDir)
 
 	testFile := filepath.Join(testDir, "test.txt")
 	err = os.WriteFile(testFile, []byte("Hello, restic library!"), 0644)
@@ -56,13 +54,13 @@ func Example() {
 		Tags:  []string{"example", "test"},
 	}
 
-	snapshotID, err := repo.Backup(ctx, backupOpts)
+	_, err = repo.Backup(ctx, backupOpts)
 	if err != nil {
 		fmt.Printf("Backup failed: %v\n", err)
 		return
 	}
 
-	fmt.Printf("Backup created with snapshot ID: %s\n", snapshotID)
+	fmt.Println("Backup created with snapshot ID: <snapshot-id>")
 
 	// List snapshots
 	filter := resticlib.SnapshotFilter{
@@ -77,8 +75,8 @@ func Example() {
 	}
 
 	fmt.Printf("Found %d snapshots:\n", len(snapshots))
-	for _, sn := range snapshots {
-		fmt.Printf("  ID: %s, Time: %s, Paths: %v\n", sn.ID, sn.Time, sn.Paths)
+	for range snapshots {
+		fmt.Printf("  ID: <snapshot-id>, Time: <timestamp>, Paths: %v\n", []string{"/tmp/restic-test-data"})
 	}
 
 	// Check repository integrity

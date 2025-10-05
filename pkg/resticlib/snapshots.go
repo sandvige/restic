@@ -133,9 +133,9 @@ func (r *repositoryImpl) matchesFilter(sn *data.Snapshot, filter SnapshotFilter)
 // convertSnapshot converts an internal snapshot to library type
 func (r *repositoryImpl) convertSnapshot(sn *data.Snapshot) Snapshot {
 	result := Snapshot{
-		ID:       SnapshotID(sn.ID().Str()),
+		ID:       SnapshotID(sn.ID().String()),
 		Time:     sn.Time.Format(time.RFC3339),
-		Tree:     sn.Tree.Str(),
+		Tree:     sn.Tree.String(),
 		Paths:    sn.Paths,
 		Hostname: sn.Hostname,
 		Username: sn.Username,
@@ -143,7 +143,7 @@ func (r *repositoryImpl) convertSnapshot(sn *data.Snapshot) Snapshot {
 	}
 
 	if sn.Parent != nil {
-		parent := sn.Parent.Str()
+		parent := sn.Parent.String()
 		result.Parent = &parent
 	}
 

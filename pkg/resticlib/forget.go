@@ -86,8 +86,8 @@ func (r *repositoryImpl) Forget(ctx context.Context, policy ForgetPolicy) ([]Sna
 				r.logf("error", "Failed to remove snapshot %s: %v", sn.ID().Str(), err)
 				continue
 			}
-			removedIDs = append(removedIDs, SnapshotID(sn.ID().Str()))
-			r.logf("info", "Removed snapshot %s", sn.ID().Str())
+			removedIDs = append(removedIDs, SnapshotID(sn.ID().String()))
+			r.logf("info", "Removed snapshot %s", sn.ID().String())
 		}
 	}
 

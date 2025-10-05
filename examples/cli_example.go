@@ -1,5 +1,14 @@
 // Package main demonstrates how to build a simple CLI using resticlib.
 // This shows how the existing restic CLI could be refactored to use the library.
+//
+// Example usage:
+//   export RESTIC_REPOSITORY=/tmp/my-backup
+//   export RESTIC_PASSWORD=mypassword
+//   go run examples/cli_example.go init
+//   go run examples/cli_example.go backup /home/user/documents
+//   go run examples/cli_example.go snapshots
+//   go run examples/cli_example.go restore <snapshot-id> /tmp/restore
+//   go run examples/cli_example.go check
 package main
 
 import (

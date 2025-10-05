@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/restic/restic/internal/data"
-	"github.com/restic/restic/internal/restic"
 	"github.com/restic/restic/internal/restorer"
 	"github.com/restic/restic/internal/ui/progress"
 	"github.com/restic/restic/internal/ui/restore"
@@ -85,17 +84,14 @@ func (p *restoreProgressPrinter) VV(msg string, args ...interface{}) {
 func (r *repositoryImpl) Restore(ctx context.Context, snapshotID SnapshotID, opts RestoreOptions) error {
 	r.logf("info", "Starting restore from snapshot %s to %s", snapshotID, opts.TargetDir)
 
-	// Parse snapshot ID
-	id, err := restic.ParseID(string(snapshotID))
+	// Find and load snapshot (supports partial IDs)
+	sn, subfolder, err := data.FindSnapshot(ctx, r.repo, r.repo, string(snapshotID))
 	if err != nil {
-		return fmt.Errorf("invalid snapshot ID: %w", err)
+		return fmt.Errorf("failed to find snapshot: %w", err)
 	}
-
-	// Load snapshot
-	sn, err := data.LoadSnapshot(ctx, r.repo, id)
-	if err != nil {
-		return fmt.Errorf("failed to load snapshot: %w", err)
-	}
+	
+	// If there's a subfolder specified, we would handle it here
+	_ = subfolder // Currently unused
 
 	// Load index
 	err = r.repo.LoadIndex(ctx, nil)

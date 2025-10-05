@@ -51,8 +51,8 @@ func (r *repositoryImpl) Check(ctx context.Context, depth CheckDepth) (CheckRepo
 	r.logf("debug", "Checking pack files")
 	errChan := make(chan error, 100)
 	go func() {
-		defer close(errChan)
 		checker.Packs(ctx, errChan)
+		// Note: Packs() closes the channel itself
 	}()
 
 	packErrors := 0
@@ -70,14 +70,14 @@ func (r *repositoryImpl) Check(ctx context.Context, depth CheckDepth) (CheckRepo
 	if depth == CheckDepthReadData {
 		r.logf("debug", "Reading and verifying pack data")
 		
-		errChan = make(chan error, 100)
+		dataErrChan := make(chan error, 100)
 		go func() {
-			defer close(errChan)
-			checker.ReadData(ctx, errChan)
+			checker.ReadData(ctx, dataErrChan)
+			// Note: ReadData() -> ReadPacks() closes the channel itself
 		}()
 
 		dataErrors := 0
-		for err := range errChan {
+		for err := range dataErrChan {
 			report.Errors = append(report.Errors, fmt.Sprintf("data error: %v", err))
 			report.Success = false
 			dataErrors++

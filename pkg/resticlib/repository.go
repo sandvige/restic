@@ -69,21 +69,61 @@ func createBackend(ctx context.Context, cfg Config) (backend.Backend, error) {
 	// Create backend based on scheme
 	switch loc.Scheme {
 	case "local":
-		return local.Create(ctx, loc.Config.(local.Config), loggerFunc)
+		if cfg, ok := loc.Config.(*local.Config); ok {
+			return local.Create(ctx, *cfg, loggerFunc)
+		} else if cfg, ok := loc.Config.(local.Config); ok {
+			return local.Create(ctx, cfg, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid local config type")
 	case "s3":
-		return s3.Create(ctx, loc.Config.(s3.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*s3.Config); ok {
+			return s3.Create(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(s3.Config); ok {
+			return s3.Create(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid s3 config type")
 	case "azure":
-		return azure.Create(ctx, loc.Config.(azure.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*azure.Config); ok {
+			return azure.Create(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(azure.Config); ok {
+			return azure.Create(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid azure config type")
 	case "gs":
-		return gs.Create(ctx, loc.Config.(gs.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*gs.Config); ok {
+			return gs.Create(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(gs.Config); ok {
+			return gs.Create(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid gs config type")
 	case "b2":
-		return b2.Create(ctx, loc.Config.(b2.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*b2.Config); ok {
+			return b2.Create(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(b2.Config); ok {
+			return b2.Create(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid b2 config type")
 	case "sftp":
-		return sftp.Create(ctx, loc.Config.(sftp.Config), loggerFunc)
+		if cfg, ok := loc.Config.(*sftp.Config); ok {
+			return sftp.Create(ctx, *cfg, loggerFunc)
+		} else if cfg, ok := loc.Config.(sftp.Config); ok {
+			return sftp.Create(ctx, cfg, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid sftp config type")
 	case "swift":
-		return swift.Open(ctx, loc.Config.(swift.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*swift.Config); ok {
+			return swift.Open(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(swift.Config); ok {
+			return swift.Open(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid swift config type")
 	case "rest":
-		return rest.Create(ctx, loc.Config.(rest.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*rest.Config); ok {
+			return rest.Create(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(rest.Config); ok {
+			return rest.Create(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid rest config type")
 	default:
 		return nil, fmt.Errorf("unsupported backend type: %s", loc.Scheme)
 	}
@@ -116,21 +156,61 @@ func openBackend(ctx context.Context, cfg Config) (backend.Backend, error) {
 	// Open backend based on scheme
 	switch loc.Scheme {
 	case "local":
-		return local.Open(ctx, loc.Config.(local.Config), loggerFunc)
+		if cfg, ok := loc.Config.(*local.Config); ok {
+			return local.Open(ctx, *cfg, loggerFunc)
+		} else if cfg, ok := loc.Config.(local.Config); ok {
+			return local.Open(ctx, cfg, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid local config type")
 	case "s3":
-		return s3.Open(ctx, loc.Config.(s3.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*s3.Config); ok {
+			return s3.Open(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(s3.Config); ok {
+			return s3.Open(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid s3 config type")
 	case "azure":
-		return azure.Open(ctx, loc.Config.(azure.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*azure.Config); ok {
+			return azure.Open(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(azure.Config); ok {
+			return azure.Open(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid azure config type")
 	case "gs":
-		return gs.Open(ctx, loc.Config.(gs.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*gs.Config); ok {
+			return gs.Open(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(gs.Config); ok {
+			return gs.Open(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid gs config type")
 	case "b2":
-		return b2.Open(ctx, loc.Config.(b2.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*b2.Config); ok {
+			return b2.Open(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(b2.Config); ok {
+			return b2.Open(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid b2 config type")
 	case "sftp":
-		return sftp.Open(ctx, loc.Config.(sftp.Config), loggerFunc)
+		if cfg, ok := loc.Config.(*sftp.Config); ok {
+			return sftp.Open(ctx, *cfg, loggerFunc)
+		} else if cfg, ok := loc.Config.(sftp.Config); ok {
+			return sftp.Open(ctx, cfg, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid sftp config type")
 	case "swift":
-		return swift.Open(ctx, loc.Config.(swift.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*swift.Config); ok {
+			return swift.Open(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(swift.Config); ok {
+			return swift.Open(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid swift config type")
 	case "rest":
-		return rest.Open(ctx, loc.Config.(rest.Config), nil, loggerFunc)
+		if cfg, ok := loc.Config.(*rest.Config); ok {
+			return rest.Open(ctx, *cfg, nil, loggerFunc)
+		} else if cfg, ok := loc.Config.(rest.Config); ok {
+			return rest.Open(ctx, cfg, nil, loggerFunc)
+		}
+		return nil, fmt.Errorf("invalid rest config type")
 	default:
 		return nil, fmt.Errorf("unsupported backend type: %s", loc.Scheme)
 	}
