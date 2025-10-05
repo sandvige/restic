@@ -3,3 +3,11 @@
 /restic.exe
 /.vagrant
 /.vscode
+
+# C library build artifacts
+pkg/cresticlib/build/
+pkg/cresticlib/*.a
+pkg/cresticlib/*.so
+pkg/cresticlib/*.dylib
+pkg/cresticlib/*.dll
+pkg/cresticlib/librestic.h
