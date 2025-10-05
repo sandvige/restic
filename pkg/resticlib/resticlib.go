@@ -14,7 +14,7 @@ type BackendKind string
 
 const (
 	BackendLocal BackendKind = "local"
-	BackendS3    BackendKind = "s3" 
+	BackendS3    BackendKind = "s3"
 	BackendAzure BackendKind = "azure"
 	BackendGCS   BackendKind = "gcs"
 	BackendB2    BackendKind = "b2"
@@ -38,7 +38,7 @@ type Logger interface {
 	Error(msg string, args ...interface{})
 }
 
-// ProgressReporter interface for progress callbacks  
+// ProgressReporter interface for progress callbacks
 type ProgressReporter interface {
 	SetTotal(total uint64)
 	Add(delta uint64)
@@ -92,34 +92,34 @@ type Snapshot struct {
 	Tags     []string   `json:"tags,omitempty"`
 	Parent   *string    `json:"parent,omitempty"`
 	Summary  *struct {
-		FilesNew          uint64 `json:"files_new"`
-		FilesChanged      uint64 `json:"files_changed"`
-		FilesUnmodified   uint64 `json:"files_unmodified"`
-		DirsNew           uint64 `json:"dirs_new"`
-		DirsChanged       uint64 `json:"dirs_changed"`
-		DirsUnmodified    uint64 `json:"dirs_unmodified"`
-		DataBlobs         uint64 `json:"data_blobs"`
-		TreeBlobs         uint64 `json:"tree_blobs"`
-		DataAdded         uint64 `json:"data_added"`
-		TotalFilesProcessed uint64 `json:"total_files_processed"`
-		TotalBytesProcessed uint64 `json:"total_bytes_processed"`
-		TotalDuration     float64 `json:"total_duration"`
-		SnapshotID        string  `json:"snapshot_id"`
+		FilesNew            uint64  `json:"files_new"`
+		FilesChanged        uint64  `json:"files_changed"`
+		FilesUnmodified     uint64  `json:"files_unmodified"`
+		DirsNew             uint64  `json:"dirs_new"`
+		DirsChanged         uint64  `json:"dirs_changed"`
+		DirsUnmodified      uint64  `json:"dirs_unmodified"`
+		DataBlobs           uint64  `json:"data_blobs"`
+		TreeBlobs           uint64  `json:"tree_blobs"`
+		DataAdded           uint64  `json:"data_added"`
+		TotalFilesProcessed uint64  `json:"total_files_processed"`
+		TotalBytesProcessed uint64  `json:"total_bytes_processed"`
+		TotalDuration       float64 `json:"total_duration"`
+		SnapshotID          string  `json:"snapshot_id"`
 	} `json:"summary,omitempty"`
 }
 
 // BackupOptions configures backup operations
 type BackupOptions struct {
-	Paths        []string         `json:"paths"`
-	Tags         []string         `json:"tags,omitempty"`
-	Excludes     []string         `json:"excludes,omitempty"`
-	Includes     []string         `json:"includes,omitempty"`
-	ParentID     *SnapshotID      `json:"parent_id,omitempty"`
-	DryRun       bool             `json:"dry_run,omitempty"`
-	Progress     ProgressReporter `json:"-"`
+	Paths    []string         `json:"paths"`
+	Tags     []string         `json:"tags,omitempty"`
+	Excludes []string         `json:"excludes,omitempty"`
+	Includes []string         `json:"includes,omitempty"`
+	ParentID *SnapshotID      `json:"parent_id,omitempty"`
+	DryRun   bool             `json:"dry_run,omitempty"`
+	Progress ProgressReporter `json:"-"`
 }
 
-// RestoreOptions configures restore operations  
+// RestoreOptions configures restore operations
 type RestoreOptions struct {
 	TargetDir string           `json:"target_dir"`
 	Includes  []string         `json:"includes,omitempty"`
@@ -132,12 +132,12 @@ type RestoreOptions struct {
 
 // SnapshotFilter for filtering snapshots
 type SnapshotFilter struct {
-	Hosts []string    `json:"hosts,omitempty"`
-	Paths []string    `json:"paths,omitempty"`
-	Tags  []string    `json:"tags,omitempty"`
-	Since *string     `json:"since,omitempty"`
-	Until *string     `json:"until,omitempty"`
-	Limit int         `json:"limit,omitempty"`
+	Hosts []string `json:"hosts,omitempty"`
+	Paths []string `json:"paths,omitempty"`
+	Tags  []string `json:"tags,omitempty"`
+	Since *string  `json:"since,omitempty"`
+	Until *string  `json:"until,omitempty"`
+	Limit int      `json:"limit,omitempty"`
 }
 
 // ForgetPolicy defines retention policy for snapshots
@@ -169,11 +169,11 @@ type PruneOptions struct {
 
 // PruneReport contains results of prune operation
 type PruneReport struct {
-	PacksDeleted   int    `json:"packs_deleted"`
-	PacksKept      int    `json:"packs_kept"`
-	PacksRepacked  int    `json:"packs_repacked"`
-	BytesDeleted   uint64 `json:"bytes_deleted"`
-	BytesRepacked  uint64 `json:"bytes_repacked"`
+	PacksDeleted  int    `json:"packs_deleted"`
+	PacksKept     int    `json:"packs_kept"`
+	PacksRepacked int    `json:"packs_repacked"`
+	BytesDeleted  uint64 `json:"bytes_deleted"`
+	BytesRepacked uint64 `json:"bytes_repacked"`
 }
 
 // CheckDepth controls how thorough the integrity check is
@@ -197,7 +197,7 @@ type Repository interface {
 	// Backup creates a new backup snapshot
 	Backup(ctx context.Context, opts BackupOptions) (SnapshotID, error)
 
-	// Restore restores files from a snapshot 
+	// Restore restores files from a snapshot
 	Restore(ctx context.Context, snapshotID SnapshotID, opts RestoreOptions) error
 
 	// Snapshots lists snapshots matching the filter
@@ -219,8 +219,6 @@ type Repository interface {
 	Close() error
 }
 
-
-
 // DefaultLogger provides a simple logger that writes to the provided writer
 type DefaultLogger struct {
 	Writer io.Writer
@@ -231,7 +229,7 @@ func (l *DefaultLogger) Debug(msg string, args ...interface{}) {
 	// Debug messages are typically not shown in default logger
 }
 
-// Info logs an info message  
+// Info logs an info message
 func (l *DefaultLogger) Info(msg string, args ...interface{}) {
 	if l.Writer != nil {
 		_, _ = l.Writer.Write([]byte(fmt.Sprintf("[INFO] "+msg+"\n", args...)))

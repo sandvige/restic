@@ -77,3 +77,4 @@ formatters:
       - third_party$
       - builtin$
       - examples$
+      - pkg/cresticlib/examples$

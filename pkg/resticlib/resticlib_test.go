@@ -30,7 +30,7 @@ func TestBasicAPI(t *testing.T) {
 		t.Logf("Init failed as expected (no valid repo): %v", err)
 	}
 
-	// Test Open function signature  
+	// Test Open function signature
 	_, err = Open(ctx, config)
 	if err != nil {
 		t.Logf("Open failed as expected (no repo): %v", err)
@@ -188,7 +188,7 @@ func TestRealRepository(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	repoPath := filepath.Join(tempDir, "repo")
-	
+
 	config := Config{
 		RepoURL:     "local:" + repoPath,
 		Backend:     BackendLocal,
@@ -284,7 +284,7 @@ func TestRealRepository(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read restore dir: %v", err)
 	}
-	
+
 	t.Logf("Restore directory contents:")
 	for _, entry := range entries {
 		t.Logf("  %s (dir: %v)", entry.Name(), entry.IsDir())

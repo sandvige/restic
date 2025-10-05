@@ -134,8 +134,8 @@ func (r *repositoryImpl) Backup(ctx context.Context, opts BackupOptions) (Snapsh
 
 	r.logf("info", "Backup completed successfully, snapshot ID: %s", snapshotID.Str())
 	if summary != nil {
-		r.logf("info", "Processed %d files, %d bytes", 
-			summary.Files.New+summary.Files.Changed+summary.Files.Unchanged, 
+		r.logf("info", "Processed %d files, %d bytes",
+			summary.Files.New+summary.Files.Changed+summary.Files.Unchanged,
 			summary.ProcessedBytes)
 	}
 

@@ -175,16 +175,8 @@ jobs:
           RESTIC_TEST_OS_PASSWORD: ${{ secrets.RESTIC_TEST_OS_PASSWORD }}
           RESTIC_TEST_OS_REGION_NAME: ${{ secrets.RESTIC_TEST_OS_REGION_NAME }}
           RESTIC_TEST_SWIFT: ${{ secrets.RESTIC_TEST_SWIFT }}
-          # fail if any of the following tests cannot be run
-          RESTIC_TEST_DISALLOW_SKIP: "restic/backend/rest.TestBackendREST,\
-            restic/backend/sftp.TestBackendSFTP,\
-            restic/backend/s3.TestBackendMinio,\
-            restic/backend/rclone.TestBackendRclone,\
-            restic/backend/s3.TestBackendS3,\
-            restic/backend/swift.TestBackendSwift,\
-            restic/backend/b2.TestBackendB2,\
-            restic/backend/gs.TestBackendGS,\
-            restic/backend/azure.TestBackendAzure"
+          # fail if any of the following tests cannot be run (only for main repo)
+          RESTIC_TEST_DISALLOW_SKIP: ${{ github.repository == 'restic/restic' && 'restic/backend/rest.TestBackendREST,restic/backend/sftp.TestBackendSFTP,restic/backend/s3.TestBackendMinio,restic/backend/rclone.TestBackendRclone,restic/backend/s3.TestBackendS3,restic/backend/swift.TestBackendSwift,restic/backend/b2.TestBackendB2,restic/backend/gs.TestBackendGS,restic/backend/azure.TestBackendAzure' || '' }}
         run: |
           # prepare credentials for Google Cloud Storage tests in a temp file
           export GOOGLE_APPLICATION_CREDENTIALS=$(mktemp --tmpdir restic-gcs-auth-XXXXXXX)
@@ -257,7 +249,7 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v2.4.0
+          version: v1.61
           args: --verbose --timeout 5m
 
         # only run golangci-lint for pull requests, otherwise ALL hints get

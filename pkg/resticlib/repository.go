@@ -65,7 +65,7 @@ func createBackend(ctx context.Context, cfg Config) (backend.Backend, error) {
 
 	// Logger function for backend (can be nil)
 	var loggerFunc func(string, ...interface{})
-	
+
 	// Create backend based on scheme
 	switch loc.Scheme {
 	case "local":
@@ -152,7 +152,7 @@ func openBackend(ctx context.Context, cfg Config) (backend.Backend, error) {
 
 	// Logger function for backend (can be nil)
 	var loggerFunc func(string, ...interface{})
-	
+
 	// Open backend based on scheme
 	switch loc.Scheme {
 	case "local":
@@ -295,7 +295,7 @@ func (r *repositoryImpl) logf(level string, msg string, args ...interface{}) {
 	if r.logger == nil {
 		return
 	}
-	
+
 	switch level {
 	case "debug":
 		r.logger.Debug(msg, args...)

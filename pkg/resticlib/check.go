@@ -30,12 +30,12 @@ func (r *repositoryImpl) Check(ctx context.Context, depth CheckDepth) (CheckRepo
 
 	// Load checker index
 	hints, errs := checker.LoadIndex(ctx, nil)
-	
+
 	// Process hints (warnings)
 	for _, hint := range hints {
 		report.Warnings = append(report.Warnings, hint.Error())
 	}
-	
+
 	// Process errors
 	for _, err := range errs {
 		report.Errors = append(report.Errors, err.Error())
@@ -69,7 +69,7 @@ func (r *repositoryImpl) Check(ctx context.Context, depth CheckDepth) (CheckRepo
 	// For read-data depth, actually read and verify data
 	if depth == CheckDepthReadData {
 		r.logf("debug", "Reading and verifying pack data")
-		
+
 		dataErrChan := make(chan error, 100)
 		go func() {
 			checker.ReadData(ctx, dataErrChan)
@@ -91,7 +91,7 @@ func (r *repositoryImpl) Check(ctx context.Context, depth CheckDepth) (CheckRepo
 	if report.Success {
 		r.logf("info", "Integrity check completed successfully")
 	} else {
-		r.logf("error", "Integrity check found %d errors and %d warnings", 
+		r.logf("error", "Integrity check found %d errors and %d warnings",
 			len(report.Errors), len(report.Warnings))
 	}
 

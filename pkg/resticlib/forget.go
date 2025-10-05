@@ -41,7 +41,7 @@ func (r *repositoryImpl) Forget(ctx context.Context, policy ForgetPolicy) ([]Sna
 	}
 
 	var removedIDs []SnapshotID
-	
+
 	for _, group := range groups {
 		// Convert policy to internal format
 		internalPolicy := data.ExpirePolicy{
@@ -115,9 +115,9 @@ func (r *repositoryImpl) Prune(ctx context.Context, opts PruneOptions) (PruneRep
 		return PruneReport{}, fmt.Errorf("prune failed: %w", err)
 	}
 
-	r.logf("info", "Prune completed: deleted %d packs, repacked %d packs", 
+	r.logf("info", "Prune completed: deleted %d packs, repacked %d packs",
 		stats.PacksDeleted, stats.PacksRepacked)
-	
+
 	return stats, nil
 }
 
@@ -125,7 +125,7 @@ func (r *repositoryImpl) Prune(ctx context.Context, opts PruneOptions) (PruneRep
 func (r *repositoryImpl) performPrune(ctx context.Context, repo *internalRepository, opts PruneOptions) (PruneReport, error) {
 	// This is a simplified prune implementation
 	// A full implementation would include the complex prune logic from internal/repository
-	
+
 	report := PruneReport{
 		PacksDeleted:  0,
 		PacksKept:     0,

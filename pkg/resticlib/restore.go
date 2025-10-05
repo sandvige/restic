@@ -89,7 +89,7 @@ func (r *repositoryImpl) Restore(ctx context.Context, snapshotID SnapshotID, opt
 	if err != nil {
 		return fmt.Errorf("failed to find snapshot: %w", err)
 	}
-	
+
 	// If there's a subfolder specified, we would handle it here
 	_ = subfolder // Currently unused
 
@@ -113,7 +113,7 @@ func (r *repositoryImpl) Restore(ctx context.Context, snapshotID SnapshotID, opt
 		Overwrite: restorer.OverwriteAlways, // Default overwrite behavior
 		Delete:    opts.Delete,
 	}
-	
+
 	if opts.Overwrite {
 		restorerOpts.Overwrite = restorer.OverwriteAlways
 	} else {

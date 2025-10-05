@@ -16,13 +16,13 @@ import (
 
 // Error codes
 const (
-	RESTIC_OK = 0
-	RESTIC_ERROR_INVALID_PARAMS = -1
-	RESTIC_ERROR_REPO_NOT_FOUND = -2
+	RESTIC_OK                     = 0
+	RESTIC_ERROR_INVALID_PARAMS   = -1
+	RESTIC_ERROR_REPO_NOT_FOUND   = -2
 	RESTIC_ERROR_INVALID_PASSWORD = -3
-	RESTIC_ERROR_BACKUP_FAILED = -4
-	RESTIC_ERROR_RESTORE_FAILED = -5
-	RESTIC_ERROR_UNKNOWN = -99
+	RESTIC_ERROR_BACKUP_FAILED    = -4
+	RESTIC_ERROR_RESTORE_FAILED   = -5
+	RESTIC_ERROR_UNKNOWN          = -99
 )
 
 // ResticRepo is an opaque pointer to a repository instance
@@ -32,7 +32,8 @@ type ResticRepo uintptr
 var repositories = make(map[ResticRepo]resticlib.Repository)
 var nextRepoID ResticRepo = 1
 
-// restic_init initializes a new repository  
+// restic_init initializes a new repository
+//
 //export restic_init
 func restic_init(repo_url *C.char, backend *C.char, password *C.char, access_key *C.char, secret_key *C.char, parallelism C.int) C.int {
 	if repo_url == nil || backend == nil || password == nil {
@@ -40,7 +41,7 @@ func restic_init(repo_url *C.char, backend *C.char, password *C.char, access_key
 	}
 
 	ctx := context.Background()
-	
+
 	cfg := resticlib.Config{
 		RepoURL:     C.GoString(repo_url),
 		Backend:     resticlib.BackendKind(C.GoString(backend)),
@@ -63,11 +64,12 @@ func restic_init(repo_url *C.char, backend *C.char, password *C.char, access_key
 	repoID := nextRepoID
 	nextRepoID++
 	repositories[repoID] = repo
-	
+
 	return C.int(repoID)
 }
 
 // restic_open opens an existing repository
+//
 //export restic_open
 func restic_open(repo_url *C.char, backend *C.char, password *C.char, access_key *C.char, secret_key *C.char, parallelism C.int) C.int {
 	if repo_url == nil || backend == nil || password == nil {
@@ -75,7 +77,7 @@ func restic_open(repo_url *C.char, backend *C.char, password *C.char, access_key
 	}
 
 	ctx := context.Background()
-	
+
 	cfg := resticlib.Config{
 		RepoURL:     C.GoString(repo_url),
 		Backend:     resticlib.BackendKind(C.GoString(backend)),
@@ -98,11 +100,12 @@ func restic_open(repo_url *C.char, backend *C.char, password *C.char, access_key
 	repoID := nextRepoID
 	nextRepoID++
 	repositories[repoID] = repo
-	
+
 	return C.int(repoID)
 }
 
 // restic_backup creates a backup and returns snapshot ID as string
+//
 //export restic_backup
 func restic_backup(repo_id C.int, paths **C.char, paths_count C.int, tags **C.char, tags_count C.int, snapshot_id_out **C.char) C.int {
 	repo, exists := repositories[ResticRepo(repo_id)]
@@ -147,6 +150,7 @@ func restic_backup(repo_id C.int, paths **C.char, paths_count C.int, tags **C.ch
 }
 
 // restic_restore restores a snapshot to target directory
+//
 //export restic_restore
 func restic_restore(repo_id C.int, snapshot_id *C.char, target_dir *C.char) C.int {
 	repo, exists := repositories[ResticRepo(repo_id)]
@@ -173,7 +177,8 @@ func restic_restore(repo_id C.int, snapshot_id *C.char, target_dir *C.char) C.in
 	return RESTIC_OK
 }
 
-// restic_list_snapshots lists all snapshots in the repository  
+// restic_list_snapshots lists all snapshots in the repository
+//
 //export restic_list_snapshots
 func restic_list_snapshots(repo_id C.int, ids_out ***C.char, times_out ***C.char, hostnames_out ***C.char, count_out *C.int) C.int {
 	repo, exists := repositories[ResticRepo(repo_id)]
@@ -217,6 +222,7 @@ func restic_list_snapshots(repo_id C.int, ids_out ***C.char, times_out ***C.char
 }
 
 // restic_check performs repository integrity check
+//
 //export restic_check
 func restic_check(repo_id C.int, errors_out *C.int) C.int {
 	repo, exists := repositories[ResticRepo(repo_id)]
@@ -236,6 +242,7 @@ func restic_check(repo_id C.int, errors_out *C.int) C.int {
 }
 
 // restic_close closes a repository and frees resources
+//
 //export restic_close
 func restic_close(repo_id C.int) C.int {
 	repo, exists := repositories[ResticRepo(repo_id)]
@@ -249,6 +256,7 @@ func restic_close(repo_id C.int) C.int {
 }
 
 // restic_free_string frees a string returned by the library
+//
 //export restic_free_string
 func restic_free_string(str *C.char) {
 	if str != nil {
@@ -257,6 +265,7 @@ func restic_free_string(str *C.char) {
 }
 
 // restic_free_snapshot_arrays frees arrays returned by restic_list_snapshots
+//
 //export restic_free_snapshot_arrays
 func restic_free_snapshot_arrays(ids **C.char, times **C.char, hostnames **C.char, count C.int) {
 	if ids != nil {
@@ -291,12 +300,14 @@ func restic_free_snapshot_arrays(ids **C.char, times **C.char, hostnames **C.cha
 }
 
 // restic_get_version returns the library version
+//
 //export restic_get_version
 func restic_get_version() *C.char {
 	return C.CString("resticlib-v0.1.0")
 }
 
 // restic_get_error_message returns a human-readable error message for an error code
+//
 //export restic_get_error_message
 func restic_get_error_message(error_code C.int) *C.char {
 	switch error_code {
