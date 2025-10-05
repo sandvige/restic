@@ -11,3 +11,4 @@ pkg/cresticlib/*.so
 pkg/cresticlib/*.dylib
 pkg/cresticlib/*.dll
 pkg/cresticlib/librestic.h
+pkg/cresticlib/test.*
