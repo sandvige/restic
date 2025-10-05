@@ -1,0 +1,310 @@
+name: Build and Release Static Libraries
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0, v2.1.3, etc.
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      tag_name:
+        description: 'Tag name for the release'
+        required: true
+        default: 'v0.1.0'
+
+env:
+  GO_VERSION: "1.21"
+
+jobs:
+  build-static-libs:
+    name: Build Static Libraries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Linux builds
+          - os: ubuntu-22.04
+            goos: linux
+            goarch: amd64
+            cc: gcc
+            output: librestic-linux-amd64.a
+          - os: ubuntu-22.04
+            goos: linux
+            goarch: arm64
+            cc: aarch64-linux-gnu-gcc
+            output: librestic-linux-arm64.a
+          
+          # macOS builds
+          - os: macos-13  # Intel
+            goos: darwin
+            goarch: amd64
+            cc: clang
+            output: librestic-darwin-amd64.a
+          - os: macos-14  # Apple Silicon
+            goos: darwin
+            goarch: arm64
+            cc: clang
+            output: librestic-darwin-arm64.a
+          
+          # Windows builds
+          - os: windows-2022
+            goos: windows
+            goarch: amd64
+            cc: x86_64-w64-mingw32-gcc
+            output: librestic-windows-amd64.a
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Install cross-compilation tools (Linux)
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        sudo apt-get update
+        if [ "${{ matrix.goarch }}" = "arm64" ]; then
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+        fi
+
+    - name: Install MinGW (Windows)
+      if: matrix.os == 'windows-2022'
+      run: |
+        choco install mingw
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Build static library
+      env:
+        CGO_ENABLED: 1
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CC: ${{ matrix.cc }}
+      run: |
+        cd pkg/cresticlib
+        mkdir -p build
+        go build -buildmode=c-archive -o build/${{ matrix.output }} .
+      shell: bash
+
+    - name: Verify build output
+      run: |
+        ls -la pkg/cresticlib/build/
+        file pkg/cresticlib/build/${{ matrix.output }}
+      shell: bash
+
+    - name: Prepare release artifacts
+      run: |
+        mkdir -p release-artifacts
+        cp pkg/cresticlib/build/${{ matrix.output }} release-artifacts/
+        cp pkg/cresticlib/resticlib.h release-artifacts/
+        cp pkg/cresticlib/ResticLib.hpp release-artifacts/
+        cp pkg/cresticlib/examples/* release-artifacts/ 2>/dev/null || true
+        
+        # Create README for this platform
+        cat > release-artifacts/README-${{ matrix.goos }}-${{ matrix.goarch }}.md << 'EOF'
+        # ResticLib Static Library - ${{ matrix.goos }}/${{ matrix.goarch }}
+        
+        This package contains the ResticLib static library for ${{ matrix.goos }}/${{ matrix.goarch }}.
+        
+        ## Files included:
+        - `${{ matrix.output }}` - Static library file
+        - `resticlib.h` - C header file  
+        - `ResticLib.hpp` - C++ wrapper header
+        
+        ## Usage:
+        
+        ### C
+        ```c
+        #include "resticlib.h"
+        // Link with: ${{ matrix.output }}
+        ```
+        
+        ### C++
+        ```cpp
+        #include "ResticLib.hpp"
+        // Link with: ${{ matrix.output }}
+        ```
+        
+        ## Compilation:
+        ```bash
+        # C example
+        gcc -o myapp myapp.c ${{ matrix.output }} -lpthread
+        
+        # C++ example  
+        g++ -o myapp myapp.cpp ${{ matrix.output }} -lpthread
+        ```
+        
+        Built with Go ${{ env.GO_VERSION }} on ${{ matrix.os }}
+        EOF
+      shell: bash
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: resticlib-${{ matrix.goos }}-${{ matrix.goarch }}
+        path: release-artifacts/
+        retention-days: 30
+
+  create-release:
+    name: Create Release
+    needs: build-static-libs
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Prepare release assets
+      run: |
+        mkdir -p release-assets
+        
+        # Copy all static libraries and headers
+        find artifacts -name "*.a" -exec cp {} release-assets/ \;
+        find artifacts -name "*.h" -exec cp {} release-assets/ \;
+        find artifacts -name "*.hpp" -exec cp {} release-assets/ \;
+        find artifacts -name "README-*.md" -exec cp {} release-assets/ \;
+        
+        # Create main README
+        cat > release-assets/README.md << 'EOF'
+        # ResticLib Static Libraries
+        
+        This release contains cross-compiled static libraries of ResticLib for multiple platforms.
+        
+        ## Supported Platforms
+        
+        | Platform | Architecture | Library File |
+        |----------|--------------|-------------|
+        | Linux | x86_64 | `librestic-linux-amd64.a` |
+        | Linux | ARM64 | `librestic-linux-arm64.a` |
+        | macOS | x86_64 (Intel) | `librestic-darwin-amd64.a` |
+        | macOS | ARM64 (Apple Silicon) | `librestic-darwin-arm64.a` |
+        | Windows | x86_64 | `librestic-windows-amd64.a` |
+        
+        ## Headers
+        
+        - `resticlib.h` - C interface header
+        - `ResticLib.hpp` - C++ wrapper header  
+        
+        ## Quick Start
+        
+        1. Download the appropriate static library for your platform
+        2. Include the headers in your project
+        3. Link against the static library
+        
+        ### Example Usage
+        
+        **C:**
+        ```c
+        #include "resticlib.h"
+        
+        int main() {
+            int repo = restic_open("/path/to/repo", "local", "password", NULL, NULL, 4);
+            // Use the library...
+            restic_close(repo);
+            return 0;
+        }
+        ```
+        
+        **C++:**
+        ```cpp
+        #include "ResticLib.hpp"
+        
+        int main() {
+            ResticLib::Config config{"/path/to/repo", "local", "password"};
+            ResticLib::Repository repo(config);
+            // Use the library...
+            return 0;
+        }
+        ```
+        
+        ## Documentation
+        
+        See the individual platform READMEs for platform-specific compilation instructions.
+        
+        Built from commit: ${{ github.sha }}
+        EOF
+        
+        # Create archive for each platform
+        cd artifacts
+        for dir in resticlib-*/; do
+          platform=$(basename "$dir" | sed 's/resticlib-//')
+          echo "Creating archive for $platform"
+          cd "$dir"
+          zip -r "../../release-assets/resticlib-$platform.zip" .
+          cd ..
+        done
+        cd ..
+        
+        ls -la release-assets/
+
+    - name: Get tag name
+      id: get_tag
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "tag_name=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+        else
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_tag.outputs.tag_name }}
+        name: ResticLib Static Libraries ${{ steps.get_tag.outputs.tag_name }}
+        body: |
+          ## ResticLib Static Libraries ${{ steps.get_tag.outputs.tag_name }}
+          
+          Cross-compiled static libraries for integrating restic functionality into C and C++ applications.
+          
+          ### What's included:
+          - ✅ Static libraries for Linux (x86_64, ARM64)
+          - ✅ Static libraries for macOS (Intel, Apple Silicon)  
+          - ✅ Static libraries for Windows (x86_64)
+          - ✅ C and C++ header files
+          - ✅ Documentation and examples
+          
+          ### Platform Support:
+          | Platform | Architecture | Download |
+          |----------|--------------|----------|
+          | Linux | x86_64 | `librestic-linux-amd64.a` |
+          | Linux | ARM64 | `librestic-linux-arm64.a` |
+          | macOS | Intel x86_64 | `librestic-darwin-amd64.a` |
+          | macOS | Apple Silicon | `librestic-darwin-arm64.a` |
+          | Windows | x86_64 | `librestic-windows-amd64.a` |
+          
+          Download the individual library files or the complete platform packages (`.zip` files) below.
+          
+          ### Quick Start:
+          1. Download the library for your target platform
+          2. Include `resticlib.h` (C) or `ResticLib.hpp` (C++) in your project
+          3. Link against the static library
+          4. See platform-specific READMEs for compilation examples
+          
+          Built from commit: `${{ github.sha }}`
+        files: |
+          release-assets/*.a
+          release-assets/*.h
+          release-assets/*.hpp
+          release-assets/*.zip
+          release-assets/README*.md
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
